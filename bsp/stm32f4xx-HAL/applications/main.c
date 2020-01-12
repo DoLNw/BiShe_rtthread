@@ -13,8 +13,6 @@
 int main(void)
 {
     /* user app entry */
-
-	rt_kprintf("my_usart2 now starts!\r\n");
 	
     return 0;
 }

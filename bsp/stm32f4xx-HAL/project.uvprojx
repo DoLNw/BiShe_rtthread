@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER, STM32F407xx</Define>
               <Undefine></Undefine>
-              <IncludePath>.;..\..\include;applications;.;drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;..\..\libcpu\arm\common;..\..\libcpu\arm\cortex-m4;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\finsh</IncludePath>
+              <IncludePath>.;..\..\include;applications;.;drivers;Libraries\CMSIS\Device\ST\STM32F4xx\Include;Libraries\CMSIS\Include;Libraries\STM32F4xx_HAL_Driver\Inc;..\..\libcpu\arm\common;..\..\libcpu\arm\cortex-m4;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\drivers\include;..\..\components\finsh;.\mypackages</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1055,6 +1055,26 @@
               <FileName>msh_file.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\components\finsh\msh_file.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>my_packages</GroupName>
+          <Files>
+            <File>
+              <FileName>blue_test_uart3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\blue_test_uart3.c</FilePath>
+            </File>
+            <File>
+              <FileName>NB101_uart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\NB101_uart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>connect_aliyun_using_AT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\connect_aliyun_using_AT.c</FilePath>
             </File>
           </Files>
         </Group>
