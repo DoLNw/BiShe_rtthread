@@ -2,7 +2,7 @@
 
 
 static rt_thread_t my_usart3_thread = RT_NULL;
-char str[] = "Hello, I'm blue_test_uart3!\r\n";
+char str[] = "my_usart3_thread initialize succeed!\r\n";
 struct rt_semaphore rx_sem1; 
 
 //»Øµ÷º¯Êý

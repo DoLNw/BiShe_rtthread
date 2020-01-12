@@ -2,7 +2,7 @@
 #include "NB101_uart1.h"
 
 static rt_thread_t my_usart1_thread = RT_NULL;
-char str2[] = "Hello, I'm NB101_uart1!\r\n";
+char str2[] = "my_usart1_thread initialize succeed!\r\n";
 struct rt_semaphore rx_sem2;
 
 //»Øµ÷º¯Êý
