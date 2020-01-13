@@ -1,10 +1,12 @@
 #include <rtdevice.h>
-#include "NB101_uart1.h"
 #include "string.h"
+#include "main.h"
 
-static rt_thread_t my_nb101_connect_thread = RT_NULL;
+
+rt_thread_t my_nb101_connect_thread = RT_NULL;
 int countChars(char* s);
 char str3[] = "my_nb101_connect_thread initialize succeed!\r\n";
+int isFirst = 1;
 
 char atStr0[] = "Let's connect to aliyun.\r\n";
 char atStr1[] = "AT+CGATT?\r\n";
@@ -42,78 +44,72 @@ char* stepStrs[9] = {
 void my_nb101_connect_thread_entry(void* parameter) {
 	nb101_uart1();
 	
+	if (isFirst) {
+		rt_sem_take(&rx_sem_uart1_ready, RT_WAITING_FOREVER);
+		isFirst = 0;
+	}
+	
 	rt_device_t serialuart1;
 	serialuart1 = rt_device_find("uart1");
 	
-//	char* receivedStr;
-//	*receivedStr = '\0'; 
-	int charOffset = 0;
-	char receivedStrs[] = "";
 	int step = 0;
-	char ch;
 	
 	rt_device_t serialuart3;
 	serialuart3 = rt_device_find("uart3");
 	
+	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 	rt_device_write(serialuart3 , 0, str3, (sizeof(str3) - 1));
+	rt_mutex_release(print_mutex);
 	step++;
 	
+	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 	rt_kprintf(stepStrs[step]);
 	unsigned char num = countChars(stepStrs[step]);
 	rt_device_write(serialuart3 , 0, stepStrs[step], ((sizeof(char) * num) - 1));
 	rt_device_write(serialuart1 , 0, stepStrs[step], ((sizeof(char) * num) - 1));
+	rt_mutex_release(print_mutex);
 	step++;
 
     while (1)
     {
-        while (rt_device_read(serialuart1 , -1, &ch, 1) != 1)
-        {
-            rt_sem_take(&rx_sem2, RT_WAITING_FOREVER);
-        }
-        
-//		rt_kprintf(&ch);
-//        rt_device_write(serialuart3 , 0, &ch, 1);
-//		*(receivedStr + (charOffset)) = ch;
-//		charOffset++;
-//		*(receivedStr + (charOffset)) = '\0';
 		
-		receivedStrs[charOffset++] = ch;
-		receivedStrs[charOffset] = '\0';
+		rt_sem_take(&rx_sem_connect, RT_WAITING_FOREVER);
 		
-//		rt_kprintf(receivedStrs);
-//		rt_device_write(serialuart3 , 0, receivedStrs, (sizeof(char) * charOffset) - 1);
+		rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+		rt_kprintf(uart1_global_receivedStrs);
+		rt_device_write(serialuart3 , 0, uart1_global_receivedStrs, (sizeof(char) * uart1_global_charOffset) - 1);
+		rt_mutex_release(print_mutex);
 		
-		if (strstr(receivedStrs, "\r\n") != NULL) {
-			rt_kprintf(receivedStrs);
-			rt_device_write(serialuart3 , 0, receivedStrs, (sizeof(char) * charOffset) - 1);
+		if (step <= 4 && strstr(uart1_global_receivedStrs, "OK\r\n") != NULL) {
 			
-			if (step <= 4 && strstr(receivedStrs, "OK\r\n") != NULL) {
-				
+			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+			rt_kprintf(stepStrs[step]);
+			num = countChars(stepStrs[step]);
+			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_mutex_release(print_mutex);
+			step++;
+			
+		} else if (step == 5) {
+			
+			if (strstr(uart1_global_receivedStrs, "0,0\r\n") != NULL) {
+				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 				rt_kprintf(stepStrs[step]);
 				num = countChars(stepStrs[step]);
 				rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
 				rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+				rt_mutex_release(print_mutex);
 				step++;
 				
-			} else if (step == 5) {
-				
-				if (strstr(receivedStrs, "0,0\r\n") != NULL) {
-					rt_kprintf(stepStrs[step]);
-					num = countChars(stepStrs[step]);
-					rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
-					rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
-					step++;
-					
-				}
-			} else if (step == 6 && strstr(receivedStrs, "0,0,0\r\n") != NULL) {
-				my_nb101_connect_thread = NULL;
-				return; 
 			}
-			
-			
-			receivedStrs[0] = '\0';
-			charOffset = 0;
+		} else if (step == 6 && strstr(uart1_global_receivedStrs, "0,0,0\r\n") != NULL) {
+			my_nb101_connect_thread = NULL;
+			return; 
 		}
+		
+		
+		uart1_global_receivedStrs[0] = '\0';
+		uart1_global_charOffset = 0;
     }
 }
 
@@ -135,15 +131,14 @@ void connect_aliyun(void) {
 	my_nb101_connect_thread = rt_thread_create( "my_usart1", my_nb101_connect_thread_entry, RT_NULL, 512, 5, 25);
 
 	if (my_nb101_connect_thread != RT_NULL) {
-		rt_thread_startup(my_nb101_connect_thread);
+		rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 		rt_kprintf(str3);
+		rt_mutex_release(print_mutex);
+		rt_thread_startup(my_nb101_connect_thread);
 	} else
 		rt_kprintf("my_nb101_connect_thread initialize failed!\r\n");
 		return ;
 }
-
-
-
 
 
 MSH_CMD_EXPORT(connect_aliyun, let nb101 connect to aliyun with the help of uart1);
@@ -154,9 +149,15 @@ void disConnect_aliyun(void) {
 	rt_device_t serialuart1;
 	serialuart1 = rt_device_find("uart1");
 	
+	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 	rt_device_write(serialuart1 , 0, atStr8, (sizeof(atStr8)));
-	rt_thread_mdelay(500);
-	rt_device_write(serialuart1 , 0, atStr8, (sizeof(atStr8)));
+	rt_mutex_release(print_mutex);
+	
+//	rt_thread_mdelay(500);
+//	
+//	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+//	rt_device_write(serialuart1 , 0, atStr8, (sizeof(atStr8)));
+//	rt_mutex_release(print_mutex);
 }
 
 MSH_CMD_EXPORT(disConnect_aliyun, let nb101 connect to aliyun with the help of uart1);

@@ -9,10 +9,14 @@
  */
 #include <rtthread.h>
 #include <board.h>
+#include "main.h"
+
+rt_mutex_t print_mutex = RT_NULL;
 
 int main(void)
 {
     /* user app entry */
+	print_mutex = rt_mutex_create("print_mutex", RT_IPC_FLAG_FIFO);
 	
     return 0;
 }

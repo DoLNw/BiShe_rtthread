@@ -1062,14 +1062,14 @@
           <GroupName>my_packages</GroupName>
           <Files>
             <File>
-              <FileName>blue_test_uart3.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mypackages\blue_test_uart3.c</FilePath>
-            </File>
-            <File>
               <FileName>NB101_uart1.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\mypackages\NB101_uart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>blue_test_uart3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\blue_test_uart3.c</FilePath>
             </File>
             <File>
               <FileName>connect_aliyun_using_AT.c</FileName>
