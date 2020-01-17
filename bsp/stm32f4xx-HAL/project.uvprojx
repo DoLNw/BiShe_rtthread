@@ -54,7 +54,7 @@
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
           <DebugInformation>1</DebugInformation>
-          <BrowseInformation>0</BrowseInformation>
+          <BrowseInformation>1</BrowseInformation>
           <ListingPath>.\build\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
@@ -1075,6 +1075,16 @@
               <FileName>connect_aliyun_using_AT.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\mypackages\connect_aliyun_using_AT.c</FilePath>
+            </File>
+            <File>
+              <FileName>post_to_aliyun.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\post_to_aliyun.c</FilePath>
+            </File>
+            <File>
+              <FileName>disConnect_aliyun.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\disConnect_aliyun.c</FilePath>
             </File>
           </Files>
         </Group>

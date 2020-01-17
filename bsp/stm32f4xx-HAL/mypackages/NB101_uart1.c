@@ -40,6 +40,7 @@ void my_usart1_thread_entry(void* parameter)
 	
 	while (1)
     {
+		//注意是serialuart1还是serialuart3，一开始搞错了查了好久
         while (rt_device_read(serialuart1, -1, &ch, 1) != 1)
         {
             rt_sem_take(&rx_sem_uart1_self, RT_WAITING_FOREVER);

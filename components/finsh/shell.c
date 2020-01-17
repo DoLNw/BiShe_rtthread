@@ -17,7 +17,7 @@
  * 2016-11-26     armink       add password authentication
  * 2018-07-02     aozima       add custome prompt support.
  */
-
+#include "main.h"
 #include <rthw.h>
 
 #ifdef RT_USING_FINSH
@@ -101,7 +101,7 @@ const char *finsh_get_prompt()
     getcwd(&finsh_prompt[rt_strlen(finsh_prompt)], RT_CONSOLEBUF_SIZE - rt_strlen(finsh_prompt));
 #endif
 
-    strcat(finsh_prompt, ">");
+    strcat(finsh_prompt, "JiaCheng >");
 
     return finsh_prompt;
 }
@@ -352,7 +352,7 @@ static void shell_auto_complete(char *prefix)
         list_prefix(prefix);
 #endif
     }
-
+	
     rt_kprintf("%s%s", FINSH_PROMPT, prefix);
 }
 

@@ -1,3 +1,9 @@
+
+
+//HC-02 write 2 4 notify 2 3
+//HC-42 write 1 1 notify 1 1
+
+
 #include <rtdevice.h>
 #include "string.h"
 #include "main.h"
@@ -52,6 +58,7 @@ void my_usart3_thread_entry(void* parameter)
 			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 			rt_kprintf(uart3_receivedStrs);
 			rt_device_write(serialuart1, 0, uart3_receivedStrs, (sizeof(char) * uart3_charOffset) - 1);
+			rt_device_write(serialuart3, 0, uart3_receivedStrs, (sizeof(char) * uart3_charOffset) - 1);
 			rt_mutex_release(print_mutex);
 			
 			uart3_receivedStrs[0] = '\0';

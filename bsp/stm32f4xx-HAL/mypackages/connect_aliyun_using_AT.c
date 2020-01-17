@@ -25,8 +25,7 @@ char atStr7[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property
 ////            ""LightSwitch" : %d},"
 ////            ""method":"thing.event.property.post"}"
 
-char atStr8[] = "AT+QMTDISC=0\r\n\0"; 
-//¶Ï¿ªÁ¬½Ó
+
 
 
 char* stepStrs[9] = {
@@ -90,19 +89,23 @@ void my_nb101_connect_thread_entry(void* parameter) {
 			rt_mutex_release(print_mutex);
 			step++;
 			
-		} else if (step == 5) {
-			
-			if (strstr(uart1_global_receivedStrs, "0,0\r\n") != NULL) {
-				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
-				rt_kprintf(stepStrs[step]);
-				num = countChars(stepStrs[step]);
-				rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
-				rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
-				rt_mutex_release(print_mutex);
-				step++;
-				
-			}
-		} else if (step == 6 && strstr(uart1_global_receivedStrs, "0,0,0\r\n") != NULL) {
+		} else if (step == 5 && strstr(uart1_global_receivedStrs, "QMTOPEN: 0,0\r\n") != NULL) {
+			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+			rt_kprintf(stepStrs[step]);
+			num = countChars(stepStrs[step]);
+			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_mutex_release(print_mutex);
+			step++;
+		} else if (step == 6 && strstr(uart1_global_receivedStrs, "QMTCONN: 0,0,0\r\n") != NULL) {
+			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+			rt_kprintf(stepStrs[step]);
+			num = countChars(stepStrs[step]);
+			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_mutex_release(print_mutex);
+			step++;
+		} else if (step == 7 && strstr(uart1_global_receivedStrs, "QMTSUB: 0,1,0,1\r\n") != NULL) {
 			my_nb101_connect_thread = NULL;
 			return; 
 		}
@@ -136,7 +139,9 @@ void connect_aliyun(void) {
 		rt_mutex_release(print_mutex);
 		rt_thread_startup(my_nb101_connect_thread);
 	} else
-		rt_kprintf("my_nb101_connect_thread initialize failed!\r\n");
+		rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+//		rt_kprintf("my_nb101_connect_thread initialize failed!\r\n");
+		rt_mutex_release(print_mutex);
 		return ;
 }
 
@@ -145,19 +150,4 @@ MSH_CMD_EXPORT(connect_aliyun, let nb101 connect to aliyun with the help of uart
 
 
 
-void disConnect_aliyun(void) {
-	rt_device_t serialuart1;
-	serialuart1 = rt_device_find("uart1");
-	
-	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
-	rt_device_write(serialuart1 , 0, atStr8, (sizeof(atStr8)));
-	rt_mutex_release(print_mutex);
-	
-//	rt_thread_mdelay(500);
-//	
-//	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
-//	rt_device_write(serialuart1 , 0, atStr8, (sizeof(atStr8)));
-//	rt_mutex_release(print_mutex);
-}
 
-MSH_CMD_EXPORT(disConnect_aliyun, let nb101 connect to aliyun with the help of uart1);

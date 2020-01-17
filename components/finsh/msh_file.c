@@ -111,6 +111,7 @@ int msh_exec_script(const char *cmd_line, int size)
                 char ch = '\0';
                 int index;
 
+				// 这个for循环应该是去除输入指令前面的空格看看除空格外最前面是否是#，若是#则是注释？
                 for (index = 0; index < length; index ++)
                 {
                     ch = line_buf[index];
