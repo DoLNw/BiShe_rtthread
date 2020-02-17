@@ -12,15 +12,33 @@
 #include "main.h"
 
 rt_mutex_t print_mutex = RT_NULL;
+rt_device_t serialuart1;
+rt_device_t serialuart3;
+
+
 
 int main(void)
 {
     /* user app entry */
+//	blue_test_uart3();
+
+	
+	rt_kprintf("\r\nBiShe_JiaCheng is ready!\r\n");
+    /* user app entry */
 	print_mutex = rt_mutex_create("print_mutex", RT_IPC_FLAG_FIFO);  //该互斥量保护串口收发一整句话不被打断
 	
+	serialuart1 = rt_device_find("uart1");
+	serialuart3 = rt_device_find("uart3");
+	
+	
+	static rt_thread_t shinning = RT_NULL;
+	shinning = rt_thread_create("shinning",led_shinning, RT_NULL, 512, 25, 20);
+	rt_thread_startup(shinning);
+	
+//	connect_aliyun();
+
     return 0;
 }
-
 
 
 

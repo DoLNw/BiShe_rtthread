@@ -2,6 +2,9 @@
 #include "string.h"
 #include "main.h"
 
+char uploadOnDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"statue\": 1, \"deviceName\": \"NB101\"}";
+//char uploadOffDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"statue\": 1, \"deviceName\": \"NB101\"}";
+
 
 rt_thread_t my_nb101_connect_thread = RT_NULL;
 int countChars(char* s);
@@ -28,19 +31,22 @@ char atStr7[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property
 
 
 
-char* stepStrs[9] = {
+char* stepStrs[10] = {
 	"Let's connect to aliyun.\r\n",
 	"AT+CGATT?\r\n",
 	"AT+CSQ\r\n",
 	"AT+QMTCFG=\"aliauth\",0,\"a1n5qqGX7PA\",\"NB101\",\"5iSvkRRHlzzWc9HZMvlfGdKPG8g9AFBd\"\r\n",
 	"AT+QMTOPEN=0,\"iot-as-mqtt.cn-shanghai.aliyuncs.com\",1883\r\n",
 	"AT+QMTCONN=0,\"clientExample\"\r\n",
+	"AT+QMTSUB=0,1,\"/sys/a1n5qqGX7PA/NB101/thing/service/property/set\",0\r\n",
 	"AT+QMTSUB=0,1,\"/a1n5qqGX7PA/NB101/user/get\",0\r\n",
 	"AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n",
 	"AT+QMTDISC=0\r\n"
 };
 
 void my_nb101_connect_thread_entry(void* parameter) {
+	deviceConnecting();
+	
 	nb101_uart1();
 	
 	if (isFirst) {
@@ -48,13 +54,9 @@ void my_nb101_connect_thread_entry(void* parameter) {
 		isFirst = 0;
 	}
 	
-	rt_device_t serialuart1;
-	serialuart1 = rt_device_find("uart1");
 	
 	int step = 0;
 	
-	rt_device_t serialuart3;
-	serialuart3 = rt_device_find("uart3");
 	
 	rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 	rt_device_write(serialuart3 , 0, str3, (sizeof(str3) - 1));
@@ -71,7 +73,6 @@ void my_nb101_connect_thread_entry(void* parameter) {
 
     while (1)
     {
-		
 		rt_sem_take(&rx_sem_connect, RT_WAITING_FOREVER);
 		
 		rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
@@ -89,23 +90,67 @@ void my_nb101_connect_thread_entry(void* parameter) {
 			rt_mutex_release(print_mutex);
 			step++;
 			
-		} else if (step == 5 && strstr(uart1_global_receivedStrs, "QMTOPEN: 0,0\r\n") != NULL) {
-			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
-			rt_kprintf(stepStrs[step]);
-			num = countChars(stepStrs[step]);
-			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
-			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
-			rt_mutex_release(print_mutex);
-			step++;
-		} else if (step == 6 && strstr(uart1_global_receivedStrs, "QMTCONN: 0,0,0\r\n") != NULL) {
-			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
-			rt_kprintf(stepStrs[step]);
-			num = countChars(stepStrs[step]);
-			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
-			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
-			rt_mutex_release(print_mutex);
-			step++;
+		} else if (step == 5) {
+			if (strstr(uart1_global_receivedStrs, "QMTOPEN: 0,0\r\n") != NULL){
+				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+				rt_kprintf(stepStrs[step]);
+				num = countChars(stepStrs[step]);
+				
+				rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+				rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+				rt_mutex_release(print_mutex);
+				step++;
+			} else if (strstr(uart1_global_receivedStrs, "QMTOPEN: 0,") != NULL){
+				deviceDisconnected();
+				
+				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+				rt_kprintf("Connecting failed!\r\n");
+				rt_mutex_release(print_mutex);
+								
+				my_nb101_connect_thread = NULL;
+				return;
+			}
+		} else if (step == 6) {
+			if (strstr(uart1_global_receivedStrs, "QMTCONN: 0,0,0\r\n") != NULL) {   //连接成功
+				deviceConnected();
+				
+				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+				rt_kprintf(stepStrs[step]);
+				num = countChars(stepStrs[step]);
+				rt_kprintf("Connecting successed!\r\n");
+				
+				rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+				rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+				rt_mutex_release(print_mutex);
+				step++;
+			} else if (strstr(uart1_global_receivedStrs, "QMTCONN: 0,") != NULL) {   //连接失败
+				deviceDisconnected();
+
+				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+				rt_kprintf("Connecting failed!\r\n");
+				rt_mutex_release(print_mutex);
+								
+				my_nb101_connect_thread = NULL;
+				return;
+			}
 		} else if (step == 7 && strstr(uart1_global_receivedStrs, "QMTSUB: 0,1,0,1\r\n") != NULL) {
+			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+			rt_kprintf(stepStrs[step]);
+			num = countChars(stepStrs[step]);
+			rt_device_write(serialuart3 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_device_write(serialuart1 , 0, stepStrs[step], (sizeof(char) * num - 1));
+			rt_mutex_release(print_mutex);
+			step++;
+		} else if (step == 8 && strstr(uart1_global_receivedStrs, "QMTSUB: 0,1,0,1\r\n") != NULL) {
+			rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+			char end_str[3];
+			end_str[0] = 0x1A;
+			end_str[1] = 0x0D;
+			end_str[2] = 0x0A;
+			rt_device_write(serialuart1 , 0, uploadOnDataStr, (sizeof(uploadOnDataStr))-1);
+			rt_device_write(serialuart1 , 0, end_str, 3);
+			rt_mutex_release(print_mutex);
+			
 			my_nb101_connect_thread = NULL;
 			return; 
 		}

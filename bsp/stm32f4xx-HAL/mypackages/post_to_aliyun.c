@@ -1,28 +1,28 @@
 #include <rtdevice.h>
 #include "main.h"
 #include "string.h"
+#include "post_to_aliyun.h"
 
 void post_to_aliyun(int argc, char **argv) {
 	if (argc != 2) {
+		rt_kprintf("argc != 2\n");
 		rt_kprintf("Usage: door status\n");
 		rt_kprintf("Like: post_to_aliyun 1\n");
+		return;
 	}
 	
 	char postStr[] = "{\"params\" : {\"ContactState\": ";
 	
 	const char* doorStatus = argv[1];
 	if (strlen(doorStatus) != 1) {
+		rt_kprintf("strlen(doorStatus) != 1\n");
 		rt_kprintf("Usage: door status\n");
 		rt_kprintf("Like: post_to_aliyun 1\n");
+		return;
 	}
 	
 	strcat(postStr, doorStatus);
 	strcat(postStr, ", \"Error\": 0}}");
-	
-	rt_device_t serialuart1;
-	serialuart1 = rt_device_find("uart1");
-	rt_device_t serialuart3;
-	serialuart3 = rt_device_find("uart3");
 	
 	char post_command[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n";
 	char end_str[3];
@@ -47,18 +47,22 @@ MSH_CMD_EXPORT(post_to_aliyun, post_to_aliyun);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+void self_post_to_aliyun(char doorStatus) {
+	char onPropertyStr[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n{\"params\" : {\"ContactState\": 1, \"Error\": 0}}";
+	char offPropertyStr[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n{\"params\" : {\"ContactState\": 0, \"Error\": 0}}";
+	
+	char end_str[3];
+	end_str[0] = 0x1A;
+	end_str[1] = 0x0D;
+	end_str[2] = 0x0A;
+	if (doorStatus == '0') {
+		rt_device_write(serialuart1 , 0, offPropertyStr, (sizeof(onPropertyStr))-1);
+		rt_device_write(serialuart1 , 0, end_str, 3);
+	} else if (doorStatus == '1') {
+		rt_device_write(serialuart1 , 0, onPropertyStr, (sizeof(onPropertyStr))-1);
+		rt_device_write(serialuart1 , 0, end_str, 3);
+	}
+}
 
 
 

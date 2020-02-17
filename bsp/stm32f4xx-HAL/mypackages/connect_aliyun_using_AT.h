@@ -5,4 +5,6 @@
 
 extern rt_thread_t my_nb101_connect_thread;
 
+void connect_aliyun(void);
+
 #endif

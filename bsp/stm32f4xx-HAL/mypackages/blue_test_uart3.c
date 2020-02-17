@@ -1,5 +1,3 @@
-
-
 //HC-02 write 2 4 notify 2 3
 //HC-42 write 1 1 notify 1 1
 
@@ -25,8 +23,6 @@ void my_usart3_thread_entry(void* parameter)
 {
     rt_sem_init(&rx_sem_uart3_self, "rx_sem1", 0, RT_IPC_FLAG_FIFO);
 	
-	rt_device_t serialuart3;
-    serialuart3 = rt_device_find("uart3");
     rt_device_open(serialuart3 , RT_DEVICE_OFLAG_RDWR | RT_DEVICE_FLAG_INT_RX );
     
     rt_device_set_rx_indicate(serialuart3 , uart3_input);
@@ -35,8 +31,6 @@ void my_usart3_thread_entry(void* parameter)
     rt_device_write(serialuart3 , 0, str, (sizeof(str) - 1));
 	rt_mutex_release(print_mutex);
 	
-	rt_device_t serialuart1;  
-	serialuart1 = rt_device_find("uart1");
 	
 	char ch;
 	int uart3_charOffset = 0;
