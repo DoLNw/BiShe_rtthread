@@ -12,6 +12,7 @@ char uart1_receivedStrs[100] = "\0", uart1_global_receivedStrs[100] = "\0";
 char onPropertyStr[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n{\"params\" : {\"ContactState\": 1, \"Error\": 0}}";
 char offPropertyStr[] = "AT+QMTPUB=0,0,0,0,\"/sys/a1n5qqGX7PA/NB101/thing/event/property/post\"\r\n{\"params\" : {\"ContactState\": 0, \"Error\": 0}}";
 
+
 //回调函数
 rt_err_t uart1_input(rt_device_t dev, rt_size_t size)
 {
@@ -82,20 +83,22 @@ void my_usart1_thread_entry(void* parameter)
 //					
 //					doorStatus[1] = '}';
 					//单片机相应开关门动作
-					
-					//接收到动作完成后上传状态（用信号量）
-//					char end_str[3];
-//					end_str[0] = 0x1A;
-//					end_str[1] = 0x0D;
-//					end_str[2] = 0x0A;
-//					if (uart1_receivedStrs[uart1_charOffset-6] == '0') {
-//						rt_device_write(serialuart1 , 0, offPropertyStr, (sizeof(onPropertyStr))-1);
-//						rt_device_write(serialuart1 , 0, end_str, 3);
-//					} else if (uart1_receivedStrs[uart1_charOffset-6] == '1') {
-//						rt_device_write(serialuart1 , 0, onPropertyStr, (sizeof(onPropertyStr))-1);
-//						rt_device_write(serialuart1 , 0, end_str, 3);
-//					}
+					if (uart1_receivedStrs[uart1_charOffset-6] == '0') {
+						close_switch();
+					} else if (uart1_receivedStrs[uart1_charOffset-6] == '1') {
+						open_switch();
+					}
 					self_post_to_aliyun(uart1_receivedStrs[uart1_charOffset-6]);
+				} else if (strstr(uart1_receivedStrs, "NB101/user/get\",{\"devicename\":\"iOS_manager1\",\"status\":1") != NULL) {
+					rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
+					char end_str[3];
+					end_str[0] = 0x1A;
+					end_str[1] = 0x0D;
+					end_str[2] = 0x0A;
+					//判断门开否
+					rt_device_write(serialuart1 , 0, uploadOnandDoorOnDataStr, (strlen(uploadOnandDoorOnDataStr)));
+					rt_device_write(serialuart1 , 0, end_str, 3);
+					rt_mutex_release(print_mutex);
 				}
 				
 				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);

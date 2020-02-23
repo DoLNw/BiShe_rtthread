@@ -1091,6 +1091,11 @@
               <FileType>1</FileType>
               <FilePath>.\mypackages\LED1_PG3.c</FilePath>
             </File>
+            <File>
+              <FileName>relay_switch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\mypackages\relay_switch.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

@@ -2,7 +2,8 @@
 #include "string.h"
 #include "main.h"
 
-char uploadOnDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"statue\": 1, \"deviceName\": \"NB101\"}";
+char uploadOnandDoorOnDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"communicate\": true, \"status\": true, \"deviceName\": \"NB101\"}";
+char uploadOnandDoorOffDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"communicate\": true, \"status\": false, \"deviceName\": \"NB101\"}";
 //char uploadOffDataStr[] = "AT+QMTPUB=0,0,0,0,\"/a1n5qqGX7PA/NB101/user/update\"\r\n{\"statue\": 1, \"deviceName\": \"NB101\"}";
 
 
@@ -147,7 +148,8 @@ void my_nb101_connect_thread_entry(void* parameter) {
 			end_str[0] = 0x1A;
 			end_str[1] = 0x0D;
 			end_str[2] = 0x0A;
-			rt_device_write(serialuart1 , 0, uploadOnDataStr, (sizeof(uploadOnDataStr))-1);
+			//ÅÐ¶ÏÃÅ¿ª·ñ
+			rt_device_write(serialuart1 , 0, uploadOnandDoorOffDataStr, (sizeof(uploadOnandDoorOffDataStr))-1);
 			rt_device_write(serialuart1 , 0, end_str, 3);
 			rt_mutex_release(print_mutex);
 			

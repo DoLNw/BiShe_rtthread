@@ -5,6 +5,7 @@
 #include "LED1_PG3.h"
 #include "post_to_aliyun.h"
 #include "blue_test_uart3.h"
+#include "relay_switch.h"
 
 extern rt_mutex_t print_mutex;
 extern rt_device_t serialuart1;

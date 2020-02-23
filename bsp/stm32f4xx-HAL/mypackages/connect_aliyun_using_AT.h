@@ -4,6 +4,8 @@
 #include <rtdevice.h>
 
 extern rt_thread_t my_nb101_connect_thread;
+extern char uploadOnandDoorOnDataStr[];
+extern char uploadOnandDoorOffDataStr[];
 
 void connect_aliyun(void);
 
