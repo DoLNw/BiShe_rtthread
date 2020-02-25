@@ -96,7 +96,11 @@ void my_usart1_thread_entry(void* parameter)
 					end_str[1] = 0x0D;
 					end_str[2] = 0x0A;
 					//ÅÐ¶ÏÃÅ¿ª·ñ
-					rt_device_write(serialuart1 , 0, uploadOnandDoorOnDataStr, (strlen(uploadOnandDoorOnDataStr)));
+					if (relay_switch_isOn) {
+						rt_device_write(serialuart1 , 0, uploadOnandDoorOnDataStr, (strlen(uploadOnandDoorOnDataStr)));
+					} else {
+						rt_device_write(serialuart1 , 0, uploadOnandDoorOffDataStr, (strlen(uploadOnandDoorOffDataStr)));
+					}
 					rt_device_write(serialuart1 , 0, end_str, 3);
 					rt_mutex_release(print_mutex);
 				}

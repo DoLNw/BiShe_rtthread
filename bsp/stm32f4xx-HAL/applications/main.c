@@ -23,7 +23,6 @@ int main(void)
 //	blue_test_uart3();
 	init_switch();
 	close_switch();
-
 	
 	rt_kprintf("\r\nBiShe_JiaCheng is ready!\r\n");
     /* user app entry */

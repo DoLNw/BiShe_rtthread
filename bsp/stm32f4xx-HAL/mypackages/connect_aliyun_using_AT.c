@@ -130,7 +130,7 @@ void my_nb101_connect_thread_entry(void* parameter) {
 				rt_mutex_take(print_mutex , RT_WAITING_FOREVER);
 				rt_kprintf("Connecting failed!\r\n");
 				rt_mutex_release(print_mutex);
-								
+				
 				my_nb101_connect_thread = NULL;
 				return;
 			}
@@ -149,7 +149,11 @@ void my_nb101_connect_thread_entry(void* parameter) {
 			end_str[1] = 0x0D;
 			end_str[2] = 0x0A;
 			//ÅÐ¶ÏÃÅ¿ª·ñ
-			rt_device_write(serialuart1 , 0, uploadOnandDoorOffDataStr, (sizeof(uploadOnandDoorOffDataStr))-1);
+			if (relay_switch_isOn) {
+				rt_device_write(serialuart1 , 0, uploadOnandDoorOnDataStr, (sizeof(uploadOnandDoorOnDataStr))-1);
+			} else {
+				rt_device_write(serialuart1 , 0, uploadOnandDoorOffDataStr, (sizeof(uploadOnandDoorOffDataStr))-1);
+			}
 			rt_device_write(serialuart1 , 0, end_str, 3);
 			rt_mutex_release(print_mutex);
 			
